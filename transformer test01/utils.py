@@ -2,7 +2,6 @@ import math
 import torch.nn.functional as F
 import torch
 
-
 def attention(query, key, value, mask=None, dropout=None):
     d_k = query.size(-1)
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
