@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from Attention import attention
 
-class MultiHeadAttentino(nn.Module):
-    def __init__(self, d_model, n_heads, dropout=0.1):
-        super(MultiHeadAttentino, self).__init__()
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, n_heads):
+        super(MultiHeadAttention, self).__init__()
         d_k = d_v = 64
         self.W_Q = nn.Linear(d_model, d_k * n_heads)
         self.W_K = nn.Linear(d_model, d_k * n_heads)
