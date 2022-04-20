@@ -22,17 +22,17 @@ class DecoderLayer(nn.Module):
         return dec_output, dec_self_attention, dec_env_attention
 
 class Decoder(nn.Module):
-    def __init__(self, ):
+    def __init__(self, tgt_vocab_size):
         super(Decoder, self).__init__()
-        tgt_vocab = {'P': 0, 'i': 1, 'want': 2, 'a': 3, 'beer': 4, 'S': 5, 'E': 6}
-        tgt_vocab_size = len(tgt_vocab)
+        # tgt_vocab = {'P': 0, 'i': 1, 'want': 2, 'a': 3, 'beer': 4, 'S': 5, 'E': 6}
         n_layers = 6
         self.target_embedding = nn.Embedding(tgt_vocab_size, 512)
-        self.pos_embedding = nn.Embedding.from_pretrained(Embedding.positionEmbedding(5, 512),freeze=True)  # freeze参数 -> 固定住预训练模型，不再更新参数
+        self.pos_embedding = nn.Embedding.from_pretrained(Embedding.positionEmbedding(6, 512),freeze=True)  # freeze参数 -> 固定住预训练模型，不再更新参数
         self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
 
-    def forward(self, enc_inputs, enc_output, dec_inputs): # dec_inputs : [batch_size x target_len]
-        dec_outputs = self.tgt_emb(dec_inputs) + self.pos_emb(torch.LongTensor([[5, 1, 2, 3, 4]])) # Shifted right
+    def forward(self, dec_inputs, enc_inputs, enc_output): # dec_inputs : [batch_size x target_len]
+        # print(dec_inputs, enc_inputs, enc_output) # ]]], grad_fn=<NativeLayerNormBackward0>) tensor([[5, 1, 2, 3, 4]]) tensor([[1, 2, 3, 4, 0]])
+        dec_outputs = self.target_embedding(dec_inputs) + self.pos_embedding(torch.LongTensor([[5, 1, 2, 3, 4]])) # Shifted right
         dec_self_attention_pad_mask = Embedding.get_attn_pad_mask(dec_inputs, dec_inputs)
         dec_self_attention_subsequent_mask = Embedding.get_attn_subsequent_mask(dec_inputs)
         # 逐个元素比较输入张量input是否大于另外的张量或浮点数other, 若大于则返回True，否则返回False，若张量other无法自动拓展成与输入张量input相同尺寸，则返回False

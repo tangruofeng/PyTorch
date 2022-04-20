@@ -9,8 +9,7 @@ def positionEmbedding(max_len, d_model):
     div_term = np.power(10000, (2 * torch.arange(0, d_model / 2, 1)) / d_model)
     pe[:, 0::2] = torch.sin(position / div_term)
     pe[:, 1::2] = torch.cos(position / div_term)
-    pe = pe.unsqueeze(0)
-    return pe
+    return torch.FloatTensor(pe)
 
 def get_attn_pad_mask(seq_q, seq_k):
     # 这个函数没看懂

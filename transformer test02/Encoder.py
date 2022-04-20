@@ -16,12 +16,14 @@ class EncoderLayer(nn.Module): # Add & Norm Layer
         return encoding_outputs, self_attention
 
 class Encoder(nn.Module):
-    def __init__(self, src_embedding, pos_embedding):
+    def __init__(self, src_vocab_size):
         super(Encoder, self).__init__()
         n_layers = 6
         d_model = 512
-        self.sr_embedding = nn.Embedding(src_embedding, d_model)
-        self.pos_embedding = nn.Embedding.from_pretrained(Embedding.positionEmbedding(5, 512), freeze=True) # freeze参数 -> 固定住预训练模型，不再更新参数
+        # src_vocab = {'P': 0, 'ich': 1, 'mochte': 2, 'ein': 3, 'bier': 4}
+        # src_vocab_size = len(src_vocab)
+        self.sr_embedding = nn.Embedding(src_vocab_size, d_model)
+        self.pos_embedding = nn.Embedding.from_pretrained(Embedding.positionEmbedding(6, 512), freeze=True) # freeze参数 -> 固定住预训练模型，不再更新参数
         self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
 
     def forward(self, enc_inputs):

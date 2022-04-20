@@ -1,29 +1,30 @@
 import torch
-import math
 import numpy as np
 
-max_len=1000
-#print(torch.arange(0, 1000, 2))
-d_model = 512
-pe = torch.zeros(max_len, d_model)
-position = torch.arange(max_len).unsqueeze(1)
-#div2_term = np.power(10000, 2 * (torch.arange(0, d_model, 2) // 2) / d_model)
-div2_term = np.power(10000, (2 * torch.arange(0, d_model / 2, 1)) / d_model)
-div_term = np.power(10000, 2 * ((torch.arange(0, d_model, 2) // 2)) / d_model)
-#print(div2_term == div_term)
-#print(torch.arange(0, d_model, 2) // 2)
+def positionEmbedding(max_len, d_model):
+    pe = torch.zeros(max_len, d_model)
+    position = torch.arange(max_len).unsqueeze(1)
+    #div_term = torch.exp(pow(10000, torch.arange(0, d_model, 2) / d_model))
+    #div_term = np.power(10000, 2 * (torch.arange(0, d_model, 2) // 2) / d_model)
+    div_term = np.power(10000, (2 * torch.arange(0, d_model / 2, 1)) / d_model)
+    pe[:, 0::2] = torch.sin(position / div_term)
+    pe[:, 1::2] = torch.cos(position / div_term)
+    return torch.FloatTensor(pe)
 
+def get_sinusoid_encoding_table(n_position, d_model):
+    def cal_angle(position, hid_idx):
+        return position / np.power(10000, 2 * (hid_idx // 2) / d_model)
+    def get_posi_angle_vec(position):
+        return [cal_angle(position, hid_j) for hid_j in range(d_model)]
 
-mask = torch.arange(1,513,1)
-n_heads = 512
-#print(mask.shape)
-mask = mask.unsqueeze(1).repeat(1, n_heads, 1, 1)# attn_mask : [batch_size x n_heads x len_q x len_k]
-#print(mask)
-#print(mask.shape)
+    sinusoid_table = np.array([get_posi_angle_vec(pos_i) for pos_i in range(n_position)])
+    sinusoid_table[:, 0::2] = np.sin(sinusoid_table[:, 0::2])  # dim 2i
+    sinusoid_table[:, 1::2] = np.cos(sinusoid_table[:, 1::2])  # dim 2i+1
+    return torch.FloatTensor(sinusoid_table)
 
-seq_k = torch.tensor([0,1,0,2,3,4,5])
-pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)  # batch_size x 1 x len_k(=len_q), one is masking
-t = pad_attn_mask.expand(512, 7, 7)
-print(pad_attn_mask)
-print(t[0])
-print(t.shape)
+p = 6
+d = 512
+print(positionEmbedding(p, d))
+print(get_sinusoid_encoding_table(p, d))
+for each in positionEmbedding(p, d) == get_sinusoid_encoding_table(p, d):
+    print(each)
